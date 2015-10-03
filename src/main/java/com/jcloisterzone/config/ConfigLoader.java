@@ -152,9 +152,11 @@ public class ConfigLoader {
             new ColorConfig("#FFED00"),
             new ColorConfig("#009900"),
             new ColorConfig("BLACK"),
-            new ColorConfig("#812EFF")
+            new ColorConfig("#812EFF"),
+            new ColorConfig("#FF69B4"),
+            new ColorConfig("#7A5230")
         ));
-        config.getPlayers().setAi_names(Lists.newArrayList("Adda", "Ellen", "Caitlyn", "Riannon", "Tankred", "Rigatona"));
+        config.getPlayers().setAi_names(Lists.newArrayList("Dana", "Avik", "Amit", "Fabien", "Tomer", "Rachel", "Udi", "dtoms"));
         config.setPlugins(Lists.newArrayList("plugins/classic.jar"));
         config.getScreenshots().setScale(DEFAULT_SCREENSHOT_SCALE);
         return config;

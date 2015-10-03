@@ -11,7 +11,7 @@ public class PlayerSlot implements Serializable {
 
     private static final long serialVersionUID = 6093356973595538191L;
 
-    public static final int COUNT = 6;
+    public static final int COUNT = 8;
 
     private final int number;
     private Integer serial; //server assign sequence number whgen type is occupied
