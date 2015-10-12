@@ -281,6 +281,10 @@ msgstr "Mantén els monestirs bàsics al joc."
 msgid "Add 3/2/1 points for tower/house/shed."
 msgstr "Afegeix 3/2/1 punts per torre/casa/sopluig."
 
+#: src/main/java/com/jcloisterzone/game/CustomRule.java:34
+msgid "Time limit per player before skipping turn"
+msgstr ""
+
 #: src/main/java/com/jcloisterzone/ui/controls/ActionPanel.java:44
 msgid "Confirm or undo a meeple placement."
 msgstr "Confirmeu o desfeu la col·locació del meeple."

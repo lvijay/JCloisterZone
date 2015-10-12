@@ -276,6 +276,10 @@ msgstr "Pidä tavalliset luostarit pelissä."
 msgid "Add 3/2/1 points for tower/house/shed."
 msgstr "Lisää 3/2/1 pistettä tornille/talolle/vajalle."
 
+#: src/main/java/com/jcloisterzone/game/CustomRule.java:34
+msgid "Time limit per player before skipping turn"
+msgstr ""
+
 #: src/main/java/com/jcloisterzone/ui/controls/ActionPanel.java:44
 msgid "Confirm or undo a meeple placement."
 msgstr "Vahvista tai peruuta pöytääminen."

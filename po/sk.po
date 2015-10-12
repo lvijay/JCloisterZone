@@ -275,6 +275,10 @@ msgstr "Zanechať kláštory základnej hry."
 msgid "Add 3/2/1 points for tower/house/shed."
 msgstr "Veža/dom/chatrč za 3/2/1 bodov"
 
+#: src/main/java/com/jcloisterzone/game/CustomRule.java:34
+msgid "Time limit per player before skipping turn"
+msgstr ""
+
 #: src/main/java/com/jcloisterzone/ui/controls/ActionPanel.java:44
 msgid "Confirm or undo a meeple placement."
 msgstr "Potvrďte alebo vráťte položenú figúrku."

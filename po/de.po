@@ -278,6 +278,10 @@ msgstr "Einfache Klöster bleiben im Spiel."
 msgid "Add 3/2/1 points for tower/house/shed."
 msgstr "3/2/1 Punkte für Turm/Haus/Hütte."
 
+#: src/main/java/com/jcloisterzone/game/CustomRule.java:34
+msgid "Time limit per player before skipping turn"
+msgstr ""
+
 #: src/main/java/com/jcloisterzone/ui/controls/ActionPanel.java:44
 msgid "Confirm or undo a meeple placement."
 msgstr "Setzen bestätigen oder zurücknehmen."

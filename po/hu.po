@@ -278,6 +278,10 @@ msgstr "Az alapjáték kolostorai is maradjanak játékban."
 msgid "Add 3/2/1 points for tower/house/shed."
 msgstr "A torony, a ház és a pajta rendre 3, 2 ill. 1 pontot ér"
 
+#: src/main/java/com/jcloisterzone/game/CustomRule.java:34
+msgid "Time limit per player before skipping turn"
+msgstr ""
+
 #: src/main/java/com/jcloisterzone/ui/controls/ActionPanel.java:44
 msgid "Confirm or undo a meeple placement."
 msgstr "Hagyd jóvá vagy vond vissza a lépésedet!"
