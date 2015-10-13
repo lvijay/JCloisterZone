@@ -1,5 +1,7 @@
 package com.jcloisterzone.ui;
 
+import static com.jcloisterzone.ui.I18nUtils._;
+
 import java.awt.Color;
 import java.awt.Image;
 import java.lang.reflect.InvocationHandler;
@@ -34,6 +36,7 @@ import com.jcloisterzone.event.SelectDragonMoveEvent;
 import com.jcloisterzone.event.TileEvent;
 import com.jcloisterzone.event.TowerIncreasedEvent;
 import com.jcloisterzone.figure.SmallFollower;
+import com.jcloisterzone.game.CustomRule;
 import com.jcloisterzone.game.Game;
 import com.jcloisterzone.game.capability.BazaarItem;
 import com.jcloisterzone.game.phase.Phase;
@@ -55,8 +58,6 @@ import com.jcloisterzone.wsio.RmiProxy;
 import com.jcloisterzone.wsio.message.GameMessage.GameState;
 import com.jcloisterzone.wsio.message.LeaveGameMessage;
 import com.jcloisterzone.wsio.message.RmiMessage;
-
-import static com.jcloisterzone.ui.I18nUtils._;
 
 public class GameController extends EventProxyUiController<Game> implements InvocationHandler {
 
@@ -139,7 +140,6 @@ public class GameController extends EventProxyUiController<Game> implements Invo
         }
     }
 
-
     @Subscribe
     public void handleTurnChanged(PlayerTurnEvent ev) {
         gameView.getGridPanel().repaint();
@@ -152,6 +152,34 @@ public class GameController extends EventProxyUiController<Game> implements Invo
         Color c = ev.getTargetPlayer().getColors().getMeepleColor();
         Image image = client.getFigureTheme().getFigureImage(SmallFollower.class, c, null);
         client.setIconImage(image);
+    }
+
+    @Subscribe
+    public void updateClockTime(PlayerTurnEvent ev) {
+        if (ev.isUndo()) {
+            return;
+        }
+
+        Integer perPlayerTime = (Integer) game.getCustomRules().get(CustomRule.CLOCK_PLAYER_TIME);
+
+        if (perPlayerTime == null) {
+            return;
+        }
+
+        Player player = ev.getTargetPlayer();
+
+        if (!player.getSlot().isOwn()) {
+            logger.warn("not self slot so quitting",
+                    player.getNick(), perPlayerTime, game.getTilePack().size());
+            // run the timer only on the player's machine
+            return;
+        }
+
+        logger.warn("Sending countdown event for {}, {}s, # of tiles={}",
+                player.getNick(), perPlayerTime, game.getTilePack().size());
+
+        ControlPanel controlPanel = gameView.getControlPanel();
+        controlPanel.startCountdownTimer(player, perPlayerTime.intValue(), game.getTilePack().size());
     }
 
     public void refreshWindowTitle() {
