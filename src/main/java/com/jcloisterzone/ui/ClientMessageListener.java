@@ -435,7 +435,6 @@ public class ClientMessageListener implements MessageListener {
         Player runningClockPlayer = msg.getRunning() == null ? null : players[msg.getRunning()];
         for (int i = 0; i < players.length; i++) {
             PlayerClock clock = players[i].getClock();
-            clock.setTime(msg.getClocks()[i]);
             clock.setRunning(runningClockPlayer == players[i]);
         }
         game.post(new ClockUpdateEvent(runningClockPlayer));

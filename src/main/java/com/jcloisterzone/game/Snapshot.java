@@ -340,8 +340,6 @@ public class Snapshot implements Serializable {
             }
             NodeList clockNl = el.getElementsByTagName("clock");
             if (clockNl.getLength() > 0) {
-                Element clockEl = (Element) clockNl.item(0);
-                p.getClock().setTime(Long.parseLong(clockEl.getAttribute("time")));
                 if (XMLUtils.attributeBoolValue(el, "running")) {
                     p.getClock().setRunning(true);
                 }
