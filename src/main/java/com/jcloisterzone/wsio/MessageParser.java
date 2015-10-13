@@ -39,6 +39,7 @@ import com.jcloisterzone.wsio.message.JoinGameMessage;
 import com.jcloisterzone.wsio.message.LeaveGameMessage;
 import com.jcloisterzone.wsio.message.LeaveSlotMessage;
 import com.jcloisterzone.wsio.message.PingMessage;
+import com.jcloisterzone.wsio.message.PlayerTimeoutMessage;
 import com.jcloisterzone.wsio.message.PongMessage;
 import com.jcloisterzone.wsio.message.PostChatMessage;
 import com.jcloisterzone.wsio.message.RmiMessage;
@@ -142,6 +143,7 @@ public final class MessageParser {
         registerMsgType(ToggleClockMessage.class);
         registerMsgType(ClockMessage.class);
         registerMsgType(CommitMessage.class);
+        registerMsgType(PlayerTimeoutMessage.class);
     }
 
     protected String getCmdName(Class<? extends WsMessage> msgType) {

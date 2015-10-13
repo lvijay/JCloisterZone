@@ -47,6 +47,7 @@ import com.jcloisterzone.wsio.message.GameSetupMessage;
 import com.jcloisterzone.wsio.message.HelloMessage;
 import com.jcloisterzone.wsio.message.LeaveSlotMessage;
 import com.jcloisterzone.wsio.message.PingMessage;
+import com.jcloisterzone.wsio.message.PlayerTimeoutMessage;
 import com.jcloisterzone.wsio.message.PongMessage;
 import com.jcloisterzone.wsio.message.PostChatMessage;
 import com.jcloisterzone.wsio.message.RmiMessage;
@@ -485,6 +486,13 @@ public class SimpleServer extends WebSocketServer  {
 
     @WsSubscribe
     public void handleUndo(WebSocket ws, UndoMessage msg) {
+        if (!msg.getGameId().equals(game.getGameId())) throw new IllegalArgumentException("Invalid game id.");
+        if (!gameStarted) throw new IllegalArgumentException("Game is not started.");
+        broadcast(msg, true);
+    }
+
+    @WsSubscribe
+    public void handlePlayerTimeout(WebSocket ws, PlayerTimeoutMessage msg) {
         if (!msg.getGameId().equals(game.getGameId())) throw new IllegalArgumentException("Invalid game id.");
         if (!gameStarted) throw new IllegalArgumentException("Game is not started.");
         broadcast(msg, true);

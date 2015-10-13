@@ -30,7 +30,6 @@ import com.jcloisterzone.Player;
 import com.jcloisterzone.PlayerClock;
 import com.jcloisterzone.PointCategory;
 import com.jcloisterzone.action.PlayerAction;
-import com.jcloisterzone.board.DefaultTilePack;
 import com.jcloisterzone.board.Tile;
 import com.jcloisterzone.board.TilePack;
 import com.jcloisterzone.event.BazaarSelectBuyOrSellEvent;
@@ -54,12 +53,11 @@ import com.jcloisterzone.figure.Meeple;
 import com.jcloisterzone.game.CustomRule;
 import com.jcloisterzone.game.Game;
 import com.jcloisterzone.game.capability.BazaarCapability;
-import com.jcloisterzone.game.phase.DrawPhase;
-import com.jcloisterzone.game.phase.Phase;
 import com.jcloisterzone.ui.Client;
 import com.jcloisterzone.ui.GameController;
 import com.jcloisterzone.ui.view.GameView;
 import com.jcloisterzone.wsio.message.CommitMessage;
+import com.jcloisterzone.wsio.message.PlayerTimeoutMessage;
 
 public class ControlPanel extends JPanel {
 
@@ -104,6 +102,7 @@ public class ControlPanel extends JPanel {
     private BazaarSupplyPanel bazaarSupplyPanel;
 
     private final Timer timer;
+    private Timer countdownTimer;
 
     public ControlPanel(GameView gameView) {
         this.client = gameView.getClient();
@@ -158,6 +157,9 @@ public class ControlPanel extends JPanel {
                 }
             }
         });
+
+        // instantiate to unnecessitate initial null checks
+        countdownTimer = new Timer(0, null);
     }
 
 
@@ -375,7 +377,6 @@ public class ControlPanel extends JPanel {
             return;
         }
 
-        System.out.println("hcue: Invoked at " + new java.util.Date());
         if (ev.isClockRunning()) {
             PlayerClock runningClock = ev.getRunningClockPlayer().getClock();
 
@@ -386,9 +387,6 @@ public class ControlPanel extends JPanel {
         }
     }
 
-    private Timer countdownTimer = new Timer(0, null); // initialize to unnecessitate null checks
-
-
     /**
      * @param player
      * @param intValue
@@ -398,65 +396,17 @@ public class ControlPanel extends JPanel {
         final long endTimeMillis = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(perPlayerTime);
 
         if (countdownTimer.isRunning()) {
-            logger.warn("timer {} stopping `{}'s old timer", countdownTimer, currentPlayer);
+            logger.debug("Stopping old timer");
             countdownTimer.stop();
         }
 
-        if (!currentPlayer.equals(game.getActivePlayer())) {
-            logger.warn("timer {} stopped since {} is no longer active", countdownTimer, currentPlayer);
+        else if (!currentPlayer.equals(game.getActivePlayer())) {
+            logger.debug("Stopping old timer since {} is no longer active", currentPlayer);
             countdownTimer.stop();
         }
 
         countdownTimer = new Timer(Integer.MAX_VALUE,
-                new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                logger.warn("timer {} execution for {}", countdownTimer, game.getActivePlayer().getNick());
-
-                Player activePlayer = game.getActivePlayer();
-                if (!currentPlayer.equals(activePlayer)) {
-                    countdownTimer.stop();
-                    logger.warn("timer {} {} is no longer the active player", countdownTimer, currentPlayer.getNick());
-                    return;
-                }
-
-                int size = game.getTilePack().size();
-                if (size != tileCount) {
-                    // other moves have been made, this timer is no longer valid
-                    logger.warn("game state has changed.  stopping timer for {}", currentPlayer);
-                    countdownTimer.stop();
-                    return;
-                }
-
-                if (System.currentTimeMillis() < endTimeMillis) {
-                    logger.warn("Timer {} {} too early {}", countdownTimer, currentPlayer, (endTimeMillis - System.currentTimeMillis()));
-                    return;
-                }
-
-                logger.warn("Time exceeded for {}.  ending turn", currentPlayer);
-                if (game.isUndoAllowed()) {
-                    game.undo();
-                }
-
-                Phase phase = game.getPhases().get(DrawPhase.class);
-                game.setPhase(phase);
-
-                // Add this tile back into the tile pack
-                Tile currentTile = game.getCurrentTile();
-                String tileGroup = game.getTileGroup(currentTile);
-                DefaultTilePack tilePack = (DefaultTilePack) game.getTilePack();
-
-                tilePack.addTile(currentTile, tileGroup);
-                game.setTurnPlayer(game.getNextPlayer());
-                repaint();
-
-                // FIXME need below to refresh all board state
-                passButton.doClick();
-
-                logger.warn("sending commitMessage, gameId={}", game.getGameId());
-                gameView.getGameController().getConnection().send(new CommitMessage(game.getGameId()));
-            }
-        });
+                new CountownTimerActionListener(currentPlayer, endTimeMillis, tileCount));
 
         logger.warn("timer {} starting for {}", countdownTimer, currentPlayer);
         countdownTimer.setDelay(500);
@@ -499,6 +449,54 @@ public class ControlPanel extends JPanel {
     @Subscribe
     public void handleMeeplePrisonEvent(FeatureEvent ev) {
         refreshPotentialPoints();
+    }
+
+    class CountownTimerActionListener implements ActionListener {
+        private final Player currentPlayer;
+        private final long endTimeMillis;
+        private final int tileCount;
+
+        /**
+         * @param currentPlayer
+         * @param endTimeMillis
+         * @param tileCount
+         */
+        public CountownTimerActionListener(Player currentPlayer, long endTimeMillis, int tileCount) {
+            this.currentPlayer = currentPlayer;
+            this.endTimeMillis = endTimeMillis;
+            this.tileCount = tileCount;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            Player activePlayer = game.getActivePlayer();
+            if (!currentPlayer.equals(activePlayer)) {
+                logger.debug("{} is no longer the active player", currentPlayer.getNick());
+                countdownTimer.stop();
+                return;
+            }
+
+            int size = game.getTilePack().size();
+            if (size != tileCount) {
+                // other moves have been made, this timer is no longer valid
+                // TODO fine better metric than number of tiles
+                logger.debug("game state has changed.  stopping timer for {}", currentPlayer);
+                countdownTimer.stop();
+                return;
+            }
+
+            if (System.currentTimeMillis() < endTimeMillis) {
+                logger.debug("Player {} still has {}ms before timeout", currentPlayer, (endTimeMillis - System.currentTimeMillis()));
+                return;
+            }
+
+            logger.debug("Time exceeded for {}.  ending turn", currentPlayer);
+
+            boolean undo = game.isUndoAllowed();
+
+            gc.getConnection().send(new PlayerTimeoutMessage(game.getGameId(), undo));
+            countdownTimer.stop();
+        }
     }
 
     class PotentialPointScoringStrategy implements ScoringStrategy, ScoreAllCallback {

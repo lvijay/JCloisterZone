@@ -22,6 +22,8 @@ import org.slf4j.LoggerFactory;
 import com.jcloisterzone.Expansion;
 import com.jcloisterzone.Player;
 import com.jcloisterzone.PlayerClock;
+import com.jcloisterzone.board.DefaultTilePack;
+import com.jcloisterzone.board.Tile;
 import com.jcloisterzone.config.Config.AutostartConfig;
 import com.jcloisterzone.config.Config.DebugConfig;
 import com.jcloisterzone.config.Config.PresetConfig;
@@ -38,6 +40,7 @@ import com.jcloisterzone.game.PlayerSlot;
 import com.jcloisterzone.game.PlayerSlot.SlotState;
 import com.jcloisterzone.game.Snapshot;
 import com.jcloisterzone.game.phase.CreateGamePhase;
+import com.jcloisterzone.game.phase.DrawPhase;
 import com.jcloisterzone.game.phase.LoadGamePhase;
 import com.jcloisterzone.game.phase.Phase;
 import com.jcloisterzone.online.Channel;
@@ -63,6 +66,7 @@ import com.jcloisterzone.wsio.message.GameMessage;
 import com.jcloisterzone.wsio.message.GameMessage.GameState;
 import com.jcloisterzone.wsio.message.GameSetupMessage;
 import com.jcloisterzone.wsio.message.GameUpdateMessage;
+import com.jcloisterzone.wsio.message.PlayerTimeoutMessage;
 import com.jcloisterzone.wsio.message.RmiMessage;
 import com.jcloisterzone.wsio.message.SetExpansionMessage;
 import com.jcloisterzone.wsio.message.SetRuleMessage;
@@ -509,6 +513,26 @@ public class ClientMessageListener implements MessageListener {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
+    }
+
+    @WsSubscribe
+    public void handlePlayerTimeout(PlayerTimeoutMessage msg) {
+        Game game = getGame(msg);
+
+        if (msg.isUndo()) {
+            game.undo();
+        }
+
+        Phase phase = game.getPhases().get(DrawPhase.class);
+        game.setPhase(phase);
+
+        // Add this tile back into the tile pack
+        Tile currentTile = game.getCurrentTile();
+        String tileGroup = game.getTileGroup(currentTile);
+        DefaultTilePack tilePack = (DefaultTilePack) game.getTilePack();
+
+        tilePack.addTile(currentTile, tileGroup);
+        game.setTurnPlayer(game.getNextPlayer());
     }
 
     @WsSubscribe

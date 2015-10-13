@@ -169,13 +169,12 @@ public class GameController extends EventProxyUiController<Game> implements Invo
         Player player = ev.getTargetPlayer();
 
         if (!player.getSlot().isOwn()) {
-            logger.warn("not self slot so quitting",
-                    player.getNick(), perPlayerTime, game.getTilePack().size());
+            logger.debug("Not {}'s machine, don't start timer", player);
             // run the timer only on the player's machine
             return;
         }
 
-        logger.warn("Sending countdown event for {}, {}s, # of tiles={}",
+        logger.debug("Sending countdown event for {}, {}s, # of tiles={}",
                 player.getNick(), perPlayerTime, game.getTilePack().size());
 
         ControlPanel controlPanel = gameView.getControlPanel();
