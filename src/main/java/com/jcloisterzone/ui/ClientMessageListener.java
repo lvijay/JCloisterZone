@@ -417,6 +417,39 @@ public class ClientMessageListener implements MessageListener {
         }
     }
 
+//    @WsSubscribe
+//    public void handleClientStateUpdate(ClientUpdateMessage msg) {
+//        EventProxyUiController<?> controller = getController(msg);
+//        if (controller == null) {
+//            logger.warn("No controller for message {}", msg);
+//            return;
+//        }
+//
+//        String name = msg.getName();
+//        int idx = name.lastIndexOf('@');
+//        if (idx == -1) {
+//            return;
+//        }
+//        String nick = name.substring(0, idx);
+//        Game game = getGame(msg);
+//        Player thePlayer = null;
+//        for (Player player : game.getAllPlayers()) {
+//            if (player.getNick().equals(nick)) {
+//                thePlayer = player;
+//            }
+//        }
+//
+//        if (thePlayer == null) {
+//            return;
+//        }
+//
+//        if (ClientState.OFFLINE.equals(msg.getState())) {
+//            thePlayer.setOffline(true);
+//        } else {
+//            thePlayer.setOffline(false);
+//        }
+//    }
+
     @WsSubscribe
     public void handleChat(ChatMessage msg) {
         EventProxyUiController<?> controller = getController(msg);

@@ -40,6 +40,7 @@ public class Player implements Serializable {
     final private int index;
     private PlayerSlot slot;
     private final PlayerClock clock = new PlayerClock();
+    private boolean offline;
 
     public Player(String nick, int index, PlayerSlot slot) {
         this.nick = nick;
@@ -163,4 +164,11 @@ public class Player implements Serializable {
         return getSlot().isOwn() && !getSlot().isAi();
     }
 
+    public boolean isOffline() {
+        return offline;
+    }
+
+    public void setOffline(boolean offline) {
+        this.offline = offline;
+    }
 }

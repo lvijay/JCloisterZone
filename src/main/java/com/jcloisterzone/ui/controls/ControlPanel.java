@@ -388,6 +388,33 @@ public class ControlPanel extends JPanel {
         }
     }
 
+    /**
+     * @param player
+     * @param intValue
+     * @param size
+     */
+    public void startCountdownTimer(final Player currentPlayer, int perPlayerTime, final int tileCount) {
+        final long endTimeMillis = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(perPlayerTime);
+
+        if (countdownTimer.isRunning()) {
+            logger.debug("Stopping old timer");
+            countdownTimer.stop();
+        }
+
+        else if (!currentPlayer.equals(game.getActivePlayer())) {
+            logger.debug("Stopping old timer since {} is no longer active", currentPlayer);
+            countdownTimer.stop();
+        }
+
+        countdownTimer = new Timer(Integer.MAX_VALUE,
+                new CountownTimerActionListener(currentPlayer, endTimeMillis, tileCount));
+
+        logger.debug("Starting timer for {}", currentPlayer);
+        countdownTimer.setDelay(500);
+        countdownTimer.setInitialDelay((int) Math.max(1000, TimeUnit.SECONDS.toMillis(perPlayerTime - 1)));
+        countdownTimer.start();
+    }
+
     @Subscribe
     public void handleScoreEvent(ScoreEvent ev) {
         refreshPotentialPoints();
@@ -486,6 +513,54 @@ public class ControlPanel extends JPanel {
                     x += 45;
                 }
             }
+        }
+    }
+
+    class CountownTimerActionListener implements ActionListener {
+        private final Player currentPlayer;
+        private final long endTimeMillis;
+        private final int tileCount;
+
+        /**
+         * @param currentPlayer
+         * @param endTimeMillis
+         * @param tileCount
+         */
+        public CountownTimerActionListener(Player currentPlayer, long endTimeMillis, int tileCount) {
+            this.currentPlayer = currentPlayer;
+            this.endTimeMillis = endTimeMillis;
+            this.tileCount = tileCount;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            Player activePlayer = game.getActivePlayer();
+            if (!currentPlayer.equals(activePlayer)) {
+                logger.debug("{} is no longer the active player", currentPlayer.getNick());
+                countdownTimer.stop();
+                return;
+            }
+
+            int size = game.getTilePack().size();
+            if (size != tileCount) {
+                // other moves have been made, this timer is no longer valid
+                // TODO fine better metric than number of tiles
+                logger.debug("game state has changed.  stopping timer for {}", currentPlayer);
+                countdownTimer.stop();
+                return;
+            }
+
+            if (System.currentTimeMillis() < endTimeMillis) {
+                logger.debug("Player {} still has {}ms before timeout", currentPlayer, (endTimeMillis - System.currentTimeMillis()));
+                return;
+            }
+
+            logger.debug("Time exceeded for {}.  ending turn", currentPlayer);
+
+            boolean undo = game.isUndoAllowed();
+
+            gc.getConnection().send(new PlayerTimeoutMessage(game.getGameId(), undo));
+            countdownTimer.stop();
         }
     }
 }
