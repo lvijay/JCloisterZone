@@ -163,4 +163,8 @@ public class Player implements Serializable {
         return getSlot().isOwn() && !getSlot().isAi();
     }
 
+    public boolean isDisconnected() {
+        return getSlot().isDisconnected();
+    }
+
 }

@@ -43,6 +43,7 @@ public class MenuBar extends JMenuBar {
         DISCARDED_TILES(_("Show Discarded Tiles"), KeyStroke.getKeyStroke(KeyEvent.VK_D, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask())),
         GAME_SETUP(_("Show Game Setup")),
         TAKE_SCREENSHOT(_("Take Screenshot"), KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0)),
+        RESIGN(_("Resign")),
         //Settings
         BEEP_ALERT(_("Beep Alert at Player Turn")),
         CONFIRM_ANY_DEPLOYMENT(_("Confirm Every Meeple Deployment")),
@@ -142,6 +143,8 @@ public class MenuBar extends JMenuBar {
         menu.addSeparator();
         menu.add(createMenuItem(MenuItem.DISCARDED_TILES, false));
         menu.add(createMenuItem(MenuItem.GAME_SETUP, false));
+        menu.addSeparator();
+        menu.add(createMenuItem(MenuItem.RESIGN, false));
         menu.addSeparator();
         menu.add(createMenuItem(MenuItem.TAKE_SCREENSHOT, false));
         this.add(menu);

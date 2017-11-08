@@ -257,6 +257,22 @@ public class Game extends GameSettings implements EventProxy {
 
     public Player getNextPlayer(Player p) {
         int playerIndex = p.getIndex();
+
+        // Find the first player after this player who isn't
+        // disconnected. Since it's possible that ALL players
+        // disconnect, limit the search to the total number of
+        // players.
+        for (int i = 1; i < plist.length; ++i) {
+            int nextPlayerIndex = (playerIndex + i) % plist.length;
+            Player nextPlayer = getPlayer(nextPlayerIndex);
+
+            if (!nextPlayer.isDisconnected()) {
+                return nextPlayer;
+            }
+        }
+
+        // It seems all players have disconnected. Just return the
+        // player after the current one and hope for the best.
         int nextPlayerIndex = playerIndex == (plist.length - 1) ? 0 : playerIndex + 1;
         return getPlayer(nextPlayerIndex);
     }

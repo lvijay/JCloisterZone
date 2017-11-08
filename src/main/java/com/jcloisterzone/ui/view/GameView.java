@@ -32,6 +32,7 @@ import com.jcloisterzone.bugreport.BugReportDialog;
 import com.jcloisterzone.config.Config.DebugConfig;
 import com.jcloisterzone.event.ClientListChangedEvent;
 import com.jcloisterzone.game.Game;
+import com.jcloisterzone.game.PlayerSlot;
 import com.jcloisterzone.game.Snapshot;
 import com.jcloisterzone.ui.Client;
 import com.jcloisterzone.ui.GameController;
@@ -44,6 +45,7 @@ import com.jcloisterzone.ui.dialog.GameSetupDialog;
 import com.jcloisterzone.ui.grid.GridPanel;
 import com.jcloisterzone.ui.grid.MainPanel;
 import com.jcloisterzone.wsio.Connection;
+import com.jcloisterzone.wsio.message.SlotMessage;
 import com.jcloisterzone.wsio.message.UndoMessage;
 
 public class GameView extends AbstractUiView implements WindowStateListener {
@@ -194,10 +196,24 @@ public class GameView extends AbstractUiView implements WindowStateListener {
                 gc.leaveGame();
             }
         });
+        menu.setItemActionListener(MenuItem.RESIGN, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                for (Player p : gc.getGame().getAllPlayers()) {
+                    if (p.isLocalHuman()) {
+                        PlayerSlot slot = p.getSlot();
+                        String sessionId = slot.getSessionId();
+                        slot.setSessionId(null);
+                        gc.getClient().getConnection().send(new SlotMessage(game.getGameId(), slot.getNumber(), slot.getSerial(), sessionId, slot.getClientId(), slot.getNickname()));
+                    }
+                }
+            }
+        });
 
         menu.setItemEnabled(MenuItem.FARM_HINTS, true);
         menu.setItemEnabled(MenuItem.LAST_PLACEMENTS, true);
         menu.setItemEnabled(MenuItem.PROJECTED_POINTS, true);
+        menu.setItemEnabled(MenuItem.RESIGN, true);
 
         menu.setItemEnabled(MenuItem.REPORT_BUG, true);
         menu.setItemEnabled(MenuItem.GAME_SETUP, true);
